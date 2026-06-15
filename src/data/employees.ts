@@ -1,10 +1,10 @@
 export const employees = [
   {
-    id: "EMP001",
+    emp_id: "1",
     name: "Rahul Sharma",
   },
   {
-    id: "EMP002",
+    emp_id: "2",
     name: "Amit Kumar",
   },
 ];

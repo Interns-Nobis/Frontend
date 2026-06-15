@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { RoleLayout } from "@/components/hrms/RoleLayout";
 import { adminNav } from "@/components/hrms/navConfigs";
@@ -30,28 +30,40 @@ const [date, setDate] = useState("");
 const [status, setStatus] = useState("");
 
 const [attendanceRecords, setAttendanceRecords] = useState<any[]>([]);
+useEffect(() => {
+  fetch("http://127.0.0.1:8000/attendance/")
+    .then((res) => res.json())
+    .then((data) => setAttendanceRecords(data))
+    .catch((err) => console.error(err));
+
+}, []);
+
+
 const [searchTerm, setSearchTerm] = useState("");
 const [filterStatus, setFilterStatus] = useState("all");
 const presentCount = attendanceRecords.filter(
-  (record) => record.status === "P"
+  (record) => record.status_code === "P"
 ).length;
 
 const absentCount = attendanceRecords.filter(
-  (record) => record.status === "A"
+  (record) => record.status_code === "A"
 ).length;
 
 const wfhCount = attendanceRecords.filter(
-  (record) => record.status === "WFH"
+  (record) => record.status_code === "WFH"
 ).length;
 
 const onSiteCount = attendanceRecords.filter(
-  (record) => record.status === "OS"
+  (record) => record.status_code === "OS"
 ).length;
+
+const [editingAttendanceId, setEditingAttendanceId]=
+  useState<number | null>(null);
 
 const leaveCount = attendanceRecords.filter(
   (record) =>
-    record.status === "SL" ||
-    record.status === "PL"
+    record.status_code === "SL" ||
+    record.status_code === "PL"
 ).length;
 const monthlyAttendance = [
   {
@@ -133,7 +145,10 @@ const monthlyAttendance = [
 
     <Select
       value={employee}
-      onValueChange={setEmployee}
+      onValueChange={(value) => {
+      console.log("Dropdown selected:", value);
+      setEmployee(value);
+}}
     >
       <SelectTrigger>
         <SelectValue placeholder="Select Employee" />
@@ -142,8 +157,8 @@ const monthlyAttendance = [
       <SelectContent>
         {employees.map((employee) => (
   <SelectItem
-    key={employee.id}
-    value={employee.name}
+    key={employee.emp_id}
+    value={String(employee.emp_id)}
   >
     {employee.name}
   </SelectItem>
@@ -188,39 +203,79 @@ const monthlyAttendance = [
 </SelectContent>
     </Select>
 
-    <Button
-  onClick={() => {
-    const newRecord = {
-      employee,
-      date,
-      status,
-    };
+<Button
+  onClick={async () => {
+    try {
 
-    if (editIndex !== null) {
-  const updatedRecords = [...attendanceRecords];
+      const attendancePayload = {
+        employee_id: Number(employee),
+        attendance_date: date,
+        status: status,
+      };
 
-  updatedRecords[editIndex] = newRecord;
+      let response;
 
-  setAttendanceRecords(updatedRecords);
+      if (editingAttendanceId !== null) {
 
-  setEditIndex(null);
-} else {
-  setAttendanceRecords([
-    ...attendanceRecords,
-    newRecord,
-  ]);
-}
+        response = await fetch(
+          `http://127.0.0.1:8000/attendance/${editingAttendanceId}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(attendancePayload),
+          }
+        );
 
-    setEmployee("");
-    setDate("");
-    setStatus("");
+      } else {
+
+        response = await fetch(
+          "http://127.0.0.1:8000/attendance/",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(attendancePayload),
+          }
+        );
+
+      }
+
+      const result = await response.json();
+
+      console.log(result);
+
+      const attendanceResponse = await fetch(
+        "http://127.0.0.1:8000/attendance/"
+      );
+
+      const attendanceData =
+        await attendanceResponse.json();
+
+      setAttendanceRecords(attendanceData);
+
+      setEmployee("");
+      setDate("");
+      setStatus("");
+
+      setEditIndex(null);
+      setEditingAttendanceId(null);
+
+    } catch (error) {
+      console.error(error);
+    }
   }}
 >
-  Mark Attendance
+  {editingAttendanceId !== null
+    ? "Update Attendance"
+    : "Mark Attendance"}
 </Button>
 
   </CardContent>
-</Card>
+</Card>.
+
 <Card>
   <CardContent className="p-6">
 
@@ -285,14 +340,12 @@ const monthlyAttendance = [
 
     {attendanceRecords
   .filter((record) =>
-    record.employee
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase())
+      String(record.emp_id).includes(searchTerm)
   )
   .filter((record) =>
     filterStatus === "all"
       ? true
-      : record.status === filterStatus
+      : record.status_code === filterStatus
   )
   .map((record, index) => (
       <div
@@ -300,14 +353,14 @@ const monthlyAttendance = [
         className="border-b py-2"
       >
         <p>
-          <strong>Employee:</strong> {record.employee}
+          <strong>Employee ID:</strong> {record.emp_id}
         </p>
 
         <p>
-          <strong>Date:</strong> {record.date}
+          <strong>Date:</strong> {record.attendance_date}
         </p>
         <p>
-  <strong>Status:</strong> {record.status}
+  <strong>Status:</strong> {record.status_code}
 </p>
 
         <div className="flex gap-2 mt-2">
@@ -316,29 +369,49 @@ const monthlyAttendance = [
     size="sm"
     variant="outline"
     onClick={() => {
-      setEmployee(record.employee);
-      setDate(record.date);
-      setStatus(record.status);
+      setEmployee(record.emp_id);
+      setDate(record.attendance_date);
+      setStatus(record.status_code);
 
       setEditIndex(index);
+      setEditingAttendanceId(record.attendance_id);
     }}
   >
     <Pencil className="h-4 w-4" />
   </Button>
 
   <Button
-    size="sm"
-    variant="destructive"
-    onClick={() => {
-      setAttendanceRecords(
-        attendanceRecords.filter(
-          (_, i) => i !== index
-        )
+  size="sm"
+  variant="destructive"
+  onClick={async () => {
+    try {
+      const response = await fetch(
+        `http://127.0.0.1:8000/attendance/${record.attendance_id}`,
+        {
+          method: "DELETE",
+        }
       );
-    }}
-  >
-    <Trash2 className="h-4 w-4" />
-  </Button>
+
+      const result = await response.json();
+
+      console.log(result);
+
+      const attendanceResponse = await fetch(
+        "http://127.0.0.1:8000/attendance/"
+      );
+
+      const attendanceData =
+        await attendanceResponse.json();
+
+      setAttendanceRecords(attendanceData);
+
+    } catch (error) {
+      console.error(error);
+    }
+  }}
+>
+  <Trash2 className="h-4 w-4" />
+</Button>
 
 </div>
       </div>
