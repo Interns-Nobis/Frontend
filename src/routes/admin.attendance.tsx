@@ -7,8 +7,25 @@ import { PageHeader } from "@/components/hrms/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { employees } from "@/data/employees";
+
 import { Pencil, Trash2 } from "lucide-react";
+
+import { Check, ChevronsUpDown } from "lucide-react";
+
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 import {
   Select,
@@ -28,6 +45,18 @@ function AttendancePage() {
   const [employee, setEmployee] = useState("");
 const [date, setDate] = useState("");
 const [status, setStatus] = useState("");
+
+const [employees, setEmployees] = useState<any[]>([]);
+
+const [open, setOpen] = useState(false);
+
+
+useEffect(() => {
+  fetch("http://127.0.0.1:8000/employees/")
+    .then((res) => res.json())
+    .then((data) => setEmployees(data))
+    .catch((err) => console.error(err));
+}, []);
 
 const [attendanceRecords, setAttendanceRecords] = useState<any[]>([]);
 useEffect(() => {
@@ -65,16 +94,7 @@ const leaveCount = attendanceRecords.filter(
     record.status_code === "SL" ||
     record.status_code === "PL"
 ).length;
-const monthlyAttendance = [
-  {
-    employee: "Rahul Sharma",
-    days: ["P", "P", "WFH", "P", "P"],
-  },
-  {
-    employee: "Amit Kumar",
-    days: ["P", "HD", "P", "P", "A"],
-  },
-];
+
   return (
     <RoleLayout items={adminNav} role="Admin" user="Admin User">
       <PageHeader
@@ -143,65 +163,71 @@ const monthlyAttendance = [
       onChange={(e) => setDate(e.target.value)}
     />
 
-    <Select
-      value={employee}
-      onValueChange={(value) => {
-      console.log("Dropdown selected:", value);
-      setEmployee(value);
-}}
+   <Popover open={open} onOpenChange={setOpen}>
+  <PopoverTrigger asChild>
+    <Button
+      variant="outline"
+      role="combobox"
+      className="justify-between"
     >
-      <SelectTrigger>
-        <SelectValue placeholder="Select Employee" />
-      </SelectTrigger>
+      {employee
+        ? (() => {
+            const emp = employees.find(
+              (e) =>
+                String(e.emp_id) === employee
+            );
 
-      <SelectContent>
-        {employees.map((employee) => (
-  <SelectItem
-    key={employee.emp_id}
-    value={String(employee.emp_id)}
-  >
-    {employee.name}
-  </SelectItem>
-))}
-      </SelectContent>
-    </Select>
+            return emp
+              ? `${emp.first_name} ${emp.last_name} (${emp.emp_id})`
+              : "Select Employee";
+          })()
+        : "Select Employee"}
 
-    <Select
-      value={status}
-      onValueChange={setStatus}
-    >
-      <SelectTrigger>
-        <SelectValue placeholder="Select Status" />
-      </SelectTrigger>
+      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+    </Button>
+  </PopoverTrigger>
 
-      <SelectContent>
-  <SelectItem value="P">Present</SelectItem>
+  <PopoverContent className="w-[350px] p-0">
+    <Command>
+      <CommandInput placeholder="Search employee..." />
 
-  <SelectItem value="WFH">
-    Work From Home
-  </SelectItem>
+      <CommandList>
+        <CommandEmpty>
+          No employee found.
+        </CommandEmpty>
 
-  <SelectItem value="OS">
-    On Site
-  </SelectItem>
+        <CommandGroup>
+          {employees.map((emp) => (
+            <CommandItem
+              key={emp.emp_id}
+              value={`${emp.first_name} ${emp.last_name} ${emp.emp_id}`}
+              onSelect={() => {
+                setEmployee(
+                  String(emp.emp_id)
+                );
 
-  <SelectItem value="HD">
-    Half Day
-  </SelectItem>
+                setOpen(false);
+              }}
+            >
+              <Check
+                className={`mr-2 h-4 w-4 ${
+                  employee ===
+                  String(emp.emp_id)
+                    ? "opacity-100"
+                    : "opacity-0"
+                }`}
+              />
 
-  <SelectItem value="SL">
-    Sick Leave
-  </SelectItem>
-
-  <SelectItem value="PL">
-    Privilege Leave
-  </SelectItem>
-
-  <SelectItem value="A">
-    Absent
-  </SelectItem>
-</SelectContent>
-    </Select>
+              {emp.first_name} {emp.last_name}
+              {" "}
+              ({emp.emp_id})
+            </CommandItem>
+          ))}
+        </CommandGroup>
+      </CommandList>
+    </Command>
+  </PopoverContent>
+</Popover>
 
 <Button
   onClick={async () => {
@@ -353,7 +379,11 @@ const monthlyAttendance = [
         className="border-b py-2"
       >
         <p>
-          <strong>Employee ID:</strong> {record.emp_id}
+        
+  <strong>Employee:</strong>{" "}
+  {record.first_name} {record.last_name}
+  {" "}({record.emp_id})
+
         </p>
 
         <p>
@@ -420,57 +450,7 @@ const monthlyAttendance = [
   </CardContent>
 </Card>
 
-<Card className="mt-6">
-  <CardContent className="p-6">
 
-    <h2 className="font-semibold text-lg mb-4">
-      Monthly Attendance Register
-    </h2>
-
-    <div className="overflow-x-auto">
-
-      <table className="w-full border">
-
-        <thead>
-          <tr>
-            <th className="border p-2">Employee</th>
-            <th className="border p-2">1</th>
-            <th className="border p-2">2</th>
-            <th className="border p-2">3</th>
-            <th className="border p-2">4</th>
-            <th className="border p-2">5</th>
-          </tr>
-        </thead>
-
-        <tbody>
-
-          {monthlyAttendance.map((employee, index) => (
-            <tr key={index}>
-
-              <td className="border p-2">
-                {employee.employee}
-              </td>
-
-              {employee.days.map((day, i) => (
-                <td
-                  key={i}
-                  className="border p-2 text-center"
-                >
-                  {day}
-                </td>
-              ))}
-
-            </tr>
-          ))}
-
-        </tbody>
-
-      </table>
-
-    </div>
-
-  </CardContent>
-</Card>
 
 </RoleLayout>
   );

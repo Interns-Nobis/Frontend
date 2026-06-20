@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { RoleLayout } from "@/components/hrms/RoleLayout";
 import { adminNav } from "@/components/hrms/navConfigs";
@@ -8,7 +8,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/hrms/StatusBadge";
 import { Check, X } from "lucide-react";
-import { mockLeaves } from "@/data/mockData";
 
 
 export const Route = createFileRoute("/admin/leaves")({
@@ -17,7 +16,16 @@ export const Route = createFileRoute("/admin/leaves")({
 
 function LeavesPage() {
   const [leaveRequests, setLeaveRequests] =
-    useState(mockLeaves);
+    useState<any[]>([]);
+
+  useEffect(() => {
+  fetch("http://127.0.0.1:8000/leave/")
+    .then((res) => res.json())
+    .then((data) => setLeaveRequests(data))
+    .catch((err) => console.error(err));
+}, []);
+
+
     const pendingCount = leaveRequests.filter(
   (leave) => leave.status === "Pending"
 ).length;
@@ -88,11 +96,18 @@ const rejectedCount = leaveRequests.filter(
             </TableHeader>
             <TableBody>
               {leaveRequests.map((l, index) => (
-                <TableRow key={l.id}>
-                  <TableCell className="font-medium">{l.employeeName}</TableCell>
-                  <TableCell>{l.type}</TableCell>
-                  <TableCell>{l.from}</TableCell>
-                  <TableCell>{l.to}</TableCell>
+                <TableRow key={l.leave_id}>
+                  <TableCell className="font-medium">
+  <div>
+    <div>{l.first_name} {l.last_name}</div>
+    <div className="text-xs text-muted-foreground">
+      Employee ID: {l.emp_id}
+    </div>
+  </div>
+</TableCell>
+                  <TableCell>{l.leave_type}</TableCell>
+                  <TableCell>{l.start_date}</TableCell>
+                  <TableCell>{l.end_date}</TableCell>
                   <TableCell className="text-muted-foreground">{l.reason}</TableCell>
                   <TableCell><StatusBadge status={l.status} /></TableCell>
                   <TableCell className="text-right">
@@ -102,33 +117,56 @@ const rejectedCount = leaveRequests.filter(
   size="sm"
   variant="ghost"
   className="text-emerald-600"
-  onClick={() => {
-    const updatedLeaves = [...leaveRequests];
+  onClick={async () => {
+    try {
+      await fetch(
+        `http://127.0.0.1:8000/leave/approve/${l.leave_code}`,
+        {
+          method: "PUT",
+        }
+      );
 
-    updatedLeaves[index] = {
-      ...updatedLeaves[index],
-      status: "Approved",
-    };
+      const response = await fetch(
+        "http://127.0.0.1:8000/leave/"
+      );
 
-    setLeaveRequests(updatedLeaves);
+      const data = await response.json();
+
+      setLeaveRequests(data);
+
+    } catch (error) {
+      console.error(error);
+    }
   }}
 >
   <Check className="h-4 w-4" />
 </Button>
 
+
 <Button
   size="sm"
   variant="ghost"
   className="text-red-600"
-  onClick={() => {
-    const updatedLeaves = [...leaveRequests];
+  onClick={async () => {
+    try {
+      await fetch(
+        `http://127.0.0.1:8000/leave/reject/${l.leave_code}`,
+        {
+          method: "PUT",
+        }
+      );
 
-    updatedLeaves[index] = {
-      ...updatedLeaves[index],
-      status: "Rejected",
-    };
+      const response = await fetch(
+        "http://127.0.0.1:8000/leave/"
+      );
 
-    setLeaveRequests(updatedLeaves);
+      const data = await response.json();
+
+      setLeaveRequests(data);
+
+    } catch (error) {
+      console.error(error);
+    }
   }}
 >
   <X className="h-4 w-4" />
