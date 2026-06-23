@@ -17,6 +17,7 @@ import { Route as EmployeeAttendanceRouteImport } from './routes/employee.attend
 import { Route as CandidateStatusRouteImport } from './routes/candidate.status'
 import { Route as CandidateProfileRouteImport } from './routes/candidate.profile'
 import { Route as CandidateOnboardingRouteImport } from './routes/candidate.onboarding'
+import { Route as CandidateLoginRouteImport } from './routes/candidate.login'
 import { Route as CandidateDocumentsRouteImport } from './routes/candidate.documents'
 import { Route as CandidateDashboardRouteImport } from './routes/candidate.dashboard'
 import { Route as CandidateChangePasswordRouteImport } from './routes/candidate.change-password'
@@ -31,7 +32,9 @@ import { Route as AdminCreateEmployeeRouteImport } from './routes/admin.create-e
 import { Route as AdminCreateCandidateRouteImport } from './routes/admin.create-candidate'
 import { Route as AdminCandidatesRouteImport } from './routes/admin.candidates'
 import { Route as AdminAttendanceRouteImport } from './routes/admin.attendance'
+import { Route as AdminEmployeesIdRouteImport } from './routes/admin.employees.$id'
 import { Route as AdminCandidatesIdRouteImport } from './routes/admin.candidates.$id'
+import { Route as AdminEmployeesEditIdRouteImport } from './routes/admin.employees.edit.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -71,6 +74,11 @@ const CandidateProfileRoute = CandidateProfileRouteImport.update({
 const CandidateOnboardingRoute = CandidateOnboardingRouteImport.update({
   id: '/candidate/onboarding',
   path: '/candidate/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CandidateLoginRoute = CandidateLoginRouteImport.update({
+  id: '/candidate/login',
+  path: '/candidate/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CandidateDocumentsRoute = CandidateDocumentsRouteImport.update({
@@ -143,10 +151,20 @@ const AdminAttendanceRoute = AdminAttendanceRouteImport.update({
   path: '/admin/attendance',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminEmployeesIdRoute = AdminEmployeesIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AdminEmployeesRoute,
+} as any)
 const AdminCandidatesIdRoute = AdminCandidatesIdRouteImport.update({
   id: '/$id',
   path: '/$id',
   getParentRoute: () => AdminCandidatesRoute,
+} as any)
+const AdminEmployeesEditIdRoute = AdminEmployeesEditIdRouteImport.update({
+  id: '/edit/$id',
+  path: '/edit/$id',
+  getParentRoute: () => AdminEmployeesRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -156,7 +174,7 @@ export interface FileRoutesByFullPath {
   '/admin/create-candidate': typeof AdminCreateCandidateRoute
   '/admin/create-employee': typeof AdminCreateEmployeeRoute
   '/admin/dashboard': typeof AdminDashboardRoute
-  '/admin/employees': typeof AdminEmployeesRoute
+  '/admin/employees': typeof AdminEmployeesRouteWithChildren
   '/admin/leaves': typeof AdminLeavesRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/org-structure': typeof AdminOrgStructureRoute
@@ -165,6 +183,7 @@ export interface FileRoutesByFullPath {
   '/candidate/change-password': typeof CandidateChangePasswordRoute
   '/candidate/dashboard': typeof CandidateDashboardRoute
   '/candidate/documents': typeof CandidateDocumentsRoute
+  '/candidate/login': typeof CandidateLoginRoute
   '/candidate/onboarding': typeof CandidateOnboardingRoute
   '/candidate/profile': typeof CandidateProfileRoute
   '/candidate/status': typeof CandidateStatusRoute
@@ -173,6 +192,8 @@ export interface FileRoutesByFullPath {
   '/employee/leaves': typeof EmployeeLeavesRoute
   '/employee/profile': typeof EmployeeProfileRoute
   '/admin/candidates/$id': typeof AdminCandidatesIdRoute
+  '/admin/employees/$id': typeof AdminEmployeesIdRoute
+  '/admin/employees/edit/$id': typeof AdminEmployeesEditIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -181,7 +202,7 @@ export interface FileRoutesByTo {
   '/admin/create-candidate': typeof AdminCreateCandidateRoute
   '/admin/create-employee': typeof AdminCreateEmployeeRoute
   '/admin/dashboard': typeof AdminDashboardRoute
-  '/admin/employees': typeof AdminEmployeesRoute
+  '/admin/employees': typeof AdminEmployeesRouteWithChildren
   '/admin/leaves': typeof AdminLeavesRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/org-structure': typeof AdminOrgStructureRoute
@@ -190,6 +211,7 @@ export interface FileRoutesByTo {
   '/candidate/change-password': typeof CandidateChangePasswordRoute
   '/candidate/dashboard': typeof CandidateDashboardRoute
   '/candidate/documents': typeof CandidateDocumentsRoute
+  '/candidate/login': typeof CandidateLoginRoute
   '/candidate/onboarding': typeof CandidateOnboardingRoute
   '/candidate/profile': typeof CandidateProfileRoute
   '/candidate/status': typeof CandidateStatusRoute
@@ -198,6 +220,8 @@ export interface FileRoutesByTo {
   '/employee/leaves': typeof EmployeeLeavesRoute
   '/employee/profile': typeof EmployeeProfileRoute
   '/admin/candidates/$id': typeof AdminCandidatesIdRoute
+  '/admin/employees/$id': typeof AdminEmployeesIdRoute
+  '/admin/employees/edit/$id': typeof AdminEmployeesEditIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -207,7 +231,7 @@ export interface FileRoutesById {
   '/admin/create-candidate': typeof AdminCreateCandidateRoute
   '/admin/create-employee': typeof AdminCreateEmployeeRoute
   '/admin/dashboard': typeof AdminDashboardRoute
-  '/admin/employees': typeof AdminEmployeesRoute
+  '/admin/employees': typeof AdminEmployeesRouteWithChildren
   '/admin/leaves': typeof AdminLeavesRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/org-structure': typeof AdminOrgStructureRoute
@@ -216,6 +240,7 @@ export interface FileRoutesById {
   '/candidate/change-password': typeof CandidateChangePasswordRoute
   '/candidate/dashboard': typeof CandidateDashboardRoute
   '/candidate/documents': typeof CandidateDocumentsRoute
+  '/candidate/login': typeof CandidateLoginRoute
   '/candidate/onboarding': typeof CandidateOnboardingRoute
   '/candidate/profile': typeof CandidateProfileRoute
   '/candidate/status': typeof CandidateStatusRoute
@@ -224,6 +249,8 @@ export interface FileRoutesById {
   '/employee/leaves': typeof EmployeeLeavesRoute
   '/employee/profile': typeof EmployeeProfileRoute
   '/admin/candidates/$id': typeof AdminCandidatesIdRoute
+  '/admin/employees/$id': typeof AdminEmployeesIdRoute
+  '/admin/employees/edit/$id': typeof AdminEmployeesEditIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -243,6 +270,7 @@ export interface FileRouteTypes {
     | '/candidate/change-password'
     | '/candidate/dashboard'
     | '/candidate/documents'
+    | '/candidate/login'
     | '/candidate/onboarding'
     | '/candidate/profile'
     | '/candidate/status'
@@ -251,6 +279,8 @@ export interface FileRouteTypes {
     | '/employee/leaves'
     | '/employee/profile'
     | '/admin/candidates/$id'
+    | '/admin/employees/$id'
+    | '/admin/employees/edit/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -268,6 +298,7 @@ export interface FileRouteTypes {
     | '/candidate/change-password'
     | '/candidate/dashboard'
     | '/candidate/documents'
+    | '/candidate/login'
     | '/candidate/onboarding'
     | '/candidate/profile'
     | '/candidate/status'
@@ -276,6 +307,8 @@ export interface FileRouteTypes {
     | '/employee/leaves'
     | '/employee/profile'
     | '/admin/candidates/$id'
+    | '/admin/employees/$id'
+    | '/admin/employees/edit/$id'
   id:
     | '__root__'
     | '/'
@@ -293,6 +326,7 @@ export interface FileRouteTypes {
     | '/candidate/change-password'
     | '/candidate/dashboard'
     | '/candidate/documents'
+    | '/candidate/login'
     | '/candidate/onboarding'
     | '/candidate/profile'
     | '/candidate/status'
@@ -301,6 +335,8 @@ export interface FileRouteTypes {
     | '/employee/leaves'
     | '/employee/profile'
     | '/admin/candidates/$id'
+    | '/admin/employees/$id'
+    | '/admin/employees/edit/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -310,7 +346,7 @@ export interface RootRouteChildren {
   AdminCreateCandidateRoute: typeof AdminCreateCandidateRoute
   AdminCreateEmployeeRoute: typeof AdminCreateEmployeeRoute
   AdminDashboardRoute: typeof AdminDashboardRoute
-  AdminEmployeesRoute: typeof AdminEmployeesRoute
+  AdminEmployeesRoute: typeof AdminEmployeesRouteWithChildren
   AdminLeavesRoute: typeof AdminLeavesRoute
   AdminLoginRoute: typeof AdminLoginRoute
   AdminOrgStructureRoute: typeof AdminOrgStructureRoute
@@ -319,6 +355,7 @@ export interface RootRouteChildren {
   CandidateChangePasswordRoute: typeof CandidateChangePasswordRoute
   CandidateDashboardRoute: typeof CandidateDashboardRoute
   CandidateDocumentsRoute: typeof CandidateDocumentsRoute
+  CandidateLoginRoute: typeof CandidateLoginRoute
   CandidateOnboardingRoute: typeof CandidateOnboardingRoute
   CandidateProfileRoute: typeof CandidateProfileRoute
   CandidateStatusRoute: typeof CandidateStatusRoute
@@ -384,6 +421,13 @@ declare module '@tanstack/react-router' {
       path: '/candidate/onboarding'
       fullPath: '/candidate/onboarding'
       preLoaderRoute: typeof CandidateOnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/candidate/login': {
+      id: '/candidate/login'
+      path: '/candidate/login'
+      fullPath: '/candidate/login'
+      preLoaderRoute: typeof CandidateLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/candidate/documents': {
@@ -484,12 +528,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAttendanceRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/employees/$id': {
+      id: '/admin/employees/$id'
+      path: '/$id'
+      fullPath: '/admin/employees/$id'
+      preLoaderRoute: typeof AdminEmployeesIdRouteImport
+      parentRoute: typeof AdminEmployeesRoute
+    }
     '/admin/candidates/$id': {
       id: '/admin/candidates/$id'
       path: '/$id'
       fullPath: '/admin/candidates/$id'
       preLoaderRoute: typeof AdminCandidatesIdRouteImport
       parentRoute: typeof AdminCandidatesRoute
+    }
+    '/admin/employees/edit/$id': {
+      id: '/admin/employees/edit/$id'
+      path: '/edit/$id'
+      fullPath: '/admin/employees/edit/$id'
+      preLoaderRoute: typeof AdminEmployeesEditIdRouteImport
+      parentRoute: typeof AdminEmployeesRoute
     }
   }
 }
@@ -506,6 +564,20 @@ const AdminCandidatesRouteWithChildren = AdminCandidatesRoute._addFileChildren(
   AdminCandidatesRouteChildren,
 )
 
+interface AdminEmployeesRouteChildren {
+  AdminEmployeesIdRoute: typeof AdminEmployeesIdRoute
+  AdminEmployeesEditIdRoute: typeof AdminEmployeesEditIdRoute
+}
+
+const AdminEmployeesRouteChildren: AdminEmployeesRouteChildren = {
+  AdminEmployeesIdRoute: AdminEmployeesIdRoute,
+  AdminEmployeesEditIdRoute: AdminEmployeesEditIdRoute,
+}
+
+const AdminEmployeesRouteWithChildren = AdminEmployeesRoute._addFileChildren(
+  AdminEmployeesRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminAttendanceRoute: AdminAttendanceRoute,
@@ -513,7 +585,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminCreateCandidateRoute: AdminCreateCandidateRoute,
   AdminCreateEmployeeRoute: AdminCreateEmployeeRoute,
   AdminDashboardRoute: AdminDashboardRoute,
-  AdminEmployeesRoute: AdminEmployeesRoute,
+  AdminEmployeesRoute: AdminEmployeesRouteWithChildren,
   AdminLeavesRoute: AdminLeavesRoute,
   AdminLoginRoute: AdminLoginRoute,
   AdminOrgStructureRoute: AdminOrgStructureRoute,
@@ -522,6 +594,7 @@ const rootRouteChildren: RootRouteChildren = {
   CandidateChangePasswordRoute: CandidateChangePasswordRoute,
   CandidateDashboardRoute: CandidateDashboardRoute,
   CandidateDocumentsRoute: CandidateDocumentsRoute,
+  CandidateLoginRoute: CandidateLoginRoute,
   CandidateOnboardingRoute: CandidateOnboardingRoute,
   CandidateProfileRoute: CandidateProfileRoute,
   CandidateStatusRoute: CandidateStatusRoute,
