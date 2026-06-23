@@ -229,9 +229,55 @@ const leaveCount = attendanceRecords.filter(
   </PopoverContent>
 </Popover>
 
+<Select
+  value={status}
+  onValueChange={setStatus}
+>
+  <SelectTrigger>
+    <SelectValue placeholder="Select Status" />
+  </SelectTrigger>
+
+  <SelectContent>
+    <SelectItem value="P">Present</SelectItem>
+
+    <SelectItem value="WFH">
+      Work From Home
+    </SelectItem>
+
+    <SelectItem value="OS">
+      On Site
+    </SelectItem>
+
+    <SelectItem value="HD">
+      Half Day
+    </SelectItem>
+
+    <SelectItem value="SL">
+      Sick Leave
+    </SelectItem>
+
+    <SelectItem value="PL">
+      Privilege Leave
+    </SelectItem>
+
+    <SelectItem value="A">
+      Absent
+    </SelectItem>
+  </SelectContent>
+</Select>
+
 <Button
   onClick={async () => {
     try {
+
+      console.log("Employee:", employee);
+      console.log("Date:", date);
+      console.log("Status:", status);
+
+      if (!employee || !date || !status) {
+  alert("Please select Employee, Date and Status");
+  return;
+}
 
       const attendancePayload = {
         employee_id: Number(employee),
